@@ -4,13 +4,17 @@
 
 namespace voxblox {
 
+float voxel_size = 0.1;
+float r_prune = 0.5;
+float min_gvd_distance = 2 * voxel_size; // Distance where we check if the neighbor is a valid neighbor 
+
 SkeletonGenerator::SkeletonGenerator()
     : min_separation_angle_(0.785),
       generate_by_layer_neighbors_(false),
       num_neighbors_for_edge_(18),
       check_edges_on_construction_(false),
-      vertex_pruning_radius_(0.35),
-      min_gvd_distance_(0.4),
+      vertex_pruning_radius_(r_prune), 
+      min_gvd_distance_(min_gvd_distance),
       cleanup_style_(kSimplify) {
   // Initialize the template matchers.
   pruning_template_matcher_.setDeletionTemplates();
@@ -114,12 +118,10 @@ void SkeletonGenerator::generateSkeleton() {
           esdf_block->getVoxelByLinearIndex(lin_index);
       VoxelIndex voxel_index =
           esdf_block->computeVoxelIndexFromLinearIndex(lin_index);
-
       if (!esdf_voxel.observed || esdf_voxel.distance < min_gvd_distance_ ||
           esdf_voxel.fixed) {
         continue;
       }
-
       Point coords = esdf_block->computeCoordinatesFromVoxelIndex(voxel_index);
 
       // Get the floating-point distance of this voxel, normalize it as long
